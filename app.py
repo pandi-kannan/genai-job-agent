@@ -29,30 +29,31 @@ with tab1:
                 resume_text = parse_resume_pdf(tmp_path)
 
                 result = agent_app.invoke({
-    "job_description": job_description,
-    "resume_text": resume_text,
-    "company_name": company_name,
-    "job_summary": "",
-    "gaps": "",
-    "fit_score": "",
-    "company_info": "",
-    "bullets": ""
-})
+                    "job_description": job_description,
+                    "resume_text": resume_text,
+                    "company_name": company_name,
+                    "job_summary": "",
+                    "gaps": "",
+                    "fit_score": "",
+                    "company_info": "",
+                    "bullets": ""
+                })
 
-                save_analysis(
-                    job_title=company_name,
-                    company_name=company_name,
-                    resume_gaps=result["gaps"],
-                    suggested_bullets=result["bullets"]
-                )
+                try:
+                    save_analysis(
+                        job_title=company_name,
+                        company_name=company_name,
+                        resume_gaps=result["gaps"],
+                        suggested_bullets=result["bullets"]
+                    )
+                except Exception as e:
+                    st.warning(f"Note: couldn't save to history ({e}), but here are your results anyway:")
 
-                st.success("Analysis complete!")
-                st.subheader("🎯 Fit Score")
-                st.info(result["fit_score"])
-                col1, col2 = st.columns(2)
+            st.success("Analysis complete!")
+            st.subheader("🎯 Fit Score")
+            st.info(result["fit_score"])
 
-            
-
+            col1, col2 = st.columns(2)
 
             with col1:
                 st.subheader("📋 Job Summary")
