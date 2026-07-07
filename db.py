@@ -21,8 +21,18 @@ class Analysis(Base):
     suggested_bullets = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+import time
+
 def init_db():
-    Base.metadata.create_all(engine)
+    for attempt in range(3):
+        try:
+            Base.metadata.create_all(engine)
+            return
+        except Exception as e:
+            if attempt < 2:
+                time.sleep(3)
+            else:
+                print(f"Database init failed after retries: {e}")
 
 def save_analysis(job_title, company_name, resume_gaps, suggested_bullets):
     session = SessionLocal()

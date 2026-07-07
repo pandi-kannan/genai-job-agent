@@ -5,7 +5,11 @@ from db import init_db, save_analysis, get_all_analyses
 import tempfile
 
 st.set_page_config(page_title="Job Application Assistant", layout="wide")
-init_db()
+
+try:
+    init_db()
+except Exception as e:
+    st.warning("Database is waking up, please refresh in a few seconds.")
 
 st.title("🎯 AI Job Application Assistant")
 st.write("Upload your resume and paste a job description to get a tailored gap analysis and resume bullets.")
