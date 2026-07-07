@@ -21,6 +21,28 @@ class AgentState(TypedDict):
     gaps: str
     company_info: str
     bullets: str
+    fit_score: str
+
+def fit_score_node(state: AgentState):
+    prompt = f"""Based on the job requirements and identified gaps below, give a Fit Score 
+    from 0-100 representing how well this candidate matches the job, followed by a one-line label.
+
+    Respond in EXACTLY this format, nothing else:
+    Score: <number>
+    Label: <Strong Match / Good Match / Moderate Match / Weak Match>
+    Reason: <one sentence explaining the score>
+
+    JOB REQUIREMENTS:
+    {state['job_summary']}
+
+    IDENTIFIED GAPS:
+    {state['gaps']}
+
+    RESUME:
+    {state['resume_text']}"""
+    response = llm.invoke(prompt)
+    state["fit_score"] = response.content
+    return state
 
 def summarize_job_node(state: AgentState):
     prompt = f"""Summarize this job description in 3-4 bullet points, 
@@ -65,16 +87,17 @@ def bullet_generator_node(state: AgentState):
     state["bullets"] = response.content
     return state
 
-# Build the graph
 graph = StateGraph(AgentState)
 graph.add_node("summarize_job", summarize_job_node)
 graph.add_node("gap_analysis", gap_analysis_node)
+graph.add_node("fit_score", fit_score_node)
 graph.add_node("company_search", company_search_node)
 graph.add_node("bullet_generator", bullet_generator_node)
 
 graph.set_entry_point("summarize_job")
 graph.add_edge("summarize_job", "gap_analysis")
-graph.add_edge("gap_analysis", "company_search")
+graph.add_edge("gap_analysis", "fit_score")
+graph.add_edge("fit_score", "company_search")
 graph.add_edge("company_search", "bullet_generator")
 graph.add_edge("bullet_generator", END)
 
@@ -87,10 +110,12 @@ if __name__ == "__main__":
         "company_name": "OpenAI",
         "job_summary": "",
         "gaps": "",
+        "fit_score": "",
         "company_info": "",
         "bullets": ""
     })
-    print("JOB SUMMARY:\n", result["job_summary"])
+    print("FIT SCORE:\n", result["fit_score"])
+    print("\nJOB SUMMARY:\n", result["job_summary"])
     print("\nGAPS:\n", result["gaps"])
     print("\nCOMPANY INFO:\n", result["company_info"])
     print("\nBULLETS:\n", result["bullets"])

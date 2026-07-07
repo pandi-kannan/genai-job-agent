@@ -29,14 +29,15 @@ with tab1:
                 resume_text = parse_resume_pdf(tmp_path)
 
                 result = agent_app.invoke({
-                    "job_description": job_description,
-                    "resume_text": resume_text,
-                    "company_name": company_name,
-                    "job_summary": "",
-                    "gaps": "",
-                    "company_info": "",
-                    "bullets": ""
-                })
+    "job_description": job_description,
+    "resume_text": resume_text,
+    "company_name": company_name,
+    "job_summary": "",
+    "gaps": "",
+    "fit_score": "",
+    "company_info": "",
+    "bullets": ""
+})
 
                 save_analysis(
                     job_title=company_name,
@@ -45,9 +46,14 @@ with tab1:
                     suggested_bullets=result["bullets"]
                 )
 
-            st.success("Analysis complete!")
+                st.success("Analysis complete!")
+                st.subheader("🎯 Fit Score")
+                st.info(result["fit_score"])
+                col1, col2 = st.columns(2)
 
-            col1, col2 = st.columns(2)
+            
+
+
             with col1:
                 st.subheader("📋 Job Summary")
                 st.write(result["job_summary"])
